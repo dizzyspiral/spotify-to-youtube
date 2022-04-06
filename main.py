@@ -6,7 +6,7 @@ from ytmusicapi import YTMusic
 def load_spotify_playlist(playlist_file):
     songs = []
 
-    with open(playlist_file) as csvfile:
+    with open(playlist_file, encoding="utf8") as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='"')
 
         for row in reader:
@@ -16,11 +16,13 @@ def load_spotify_playlist(playlist_file):
 
 def search_for_songs(ytmusic, search_strings):
     video_ids = []
-
+    i = 1
     for s in search_strings:
         result = ytmusic.search(s)
         try:
             video_ids.append(result[1]['videoId'])
+            print("Video ID '{}' appended for song '{}'".format(i,s))
+            i += 1
         except:
             print("Unable to get video ID for song '{}'".format(s))
 
@@ -48,8 +50,11 @@ def add_songs(ytmusic, playlist_id, video_ids):
         print("Skipped adding {} songs (probably duplicates)".format(skipped_songs))
 
 def add_likes(ytmusic, video_ids):
+    i = 1
     for video_id in video_ids:
         ytmusic.rate_song(video_id, rating='LIKE')
+        print("'{} songs added to YouTube Music'".format(i))
+        i += 1
 
 def get_args():
     parser = argparse.ArgumentParser(description='Import a Spotify playlist to YouTube Music')
@@ -82,7 +87,6 @@ if  __name__ == '__main__':
     songs = load_spotify_playlist(args.file)
     print("Searching for songs on YouTube...")
     video_ids = search_for_songs(ytmusic, songs)
-
     if args.likes:
         add_likes(ytmusic, video_ids)
     else:
